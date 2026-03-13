@@ -50,28 +50,31 @@ class ContentGenerator:
     def generate_voiceover(self, script, topic):
         """
         Uses ElevenLabs to convert the script into a realistic voiceover.
+        Note: Using ElevenLabs 2.x SDK syntax.
         """
         logger.info("Generating professional voiceover using ElevenLabs...")
         
         output_path = f"voiceover_{int(time.time())}.mp3"
         
         try:
-            audio = self.elevenlabs_client.generate(
+            # Using '21m00Tcm4TlvDq8ikWAM' which is the standard 'Rachel' voice
+            audio_generator = self.elevenlabs_client.text_to_speech.convert(
                 text=script,
-                voice="Adam", # A popular high-energy male voice
-                model="eleven_multilingual_v2"
+                voice_id="21m00Tcm4TlvDq8ikWAM", 
+                model_id="eleven_multilingual_v2"
             )
             
-            # Save the generator/iterator to a file
+            # Save the audio stream to a file
             with open(output_path, "wb") as f:
-                for chunk in audio:
+                for chunk in audio_generator:
                     if chunk:
                         f.write(chunk)
             
             logger.info(f"Voiceover saved to: {output_path}")
             return output_path
         except Exception as e:
-            logger.error(f"Failed to generate voiceover: {e}")
+            logger.error(f"ElevenLabs generation failed: {e}")
+            logger.info("Tip: If 'Rachel' isn't found, please login to ElevenLabs and copy a Voice ID from your 'VoiceLab' into generator.py.")
             return None
 
     def compile_video(self, topic, voiceover_file):
